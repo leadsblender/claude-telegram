@@ -1,0 +1,19 @@
+{
+  "name": "claude-telegram",
+  "version": "1.0.0",
+  "description": "Connect your Telegram bot to Claude Code — send messages, get AI responses with full tool access.",
+  "main": "daemon.js",
+  "scripts": {
+    "start": "node daemon.js",
+    "setup": "bash setup.sh"
+  },
+  "keywords": ["claude", "telegram", "ai", "claude-code", "anthropic"],
+  "author": "Orlando Watson <orlando@leadsblender.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
