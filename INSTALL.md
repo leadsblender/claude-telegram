@@ -8,7 +8,10 @@ Open Claude Code in your terminal and paste this prompt:
 Install the Claude Telegram daemon from https://github.com/leadsblender/claude-telegram
 
 Steps to follow:
-1. Check if Node.js 18+ is installed. If not, tell me to install it first.
+1. Check if Node.js 18+ is installed. If not, install it automatically:
+   - On macOS: run `brew install node` (install Homebrew first if needed via /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)")
+   - On Linux/VPS: run `curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs`
+   - Verify with: `node --version`
 2. Check if the Claude Code CLI (`claude`) is installed. If not, run: npm install -g @anthropic-ai/claude-code
 3. Clone the repo to ~/claude-telegram: git clone https://github.com/leadsblender/claude-telegram ~/claude-telegram
 4. Run npm install inside ~/claude-telegram
