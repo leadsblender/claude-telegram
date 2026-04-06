@@ -86,6 +86,7 @@ function runClaude(prompt) {
       '--output-format', 'text',
       '--model', MODEL,
       '--allowedTools', ALLOWED_TOOLS,
+      '--dangerously-skip-permissions',
     ];
 
     const proc = spawn('claude', args, {
