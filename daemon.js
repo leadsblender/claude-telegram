@@ -92,6 +92,7 @@ function runClaude(prompt) {
       cwd: WORK_DIR,
       env: { ...process.env },
       timeout: TIMEOUT_MS,
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     let output = '';
