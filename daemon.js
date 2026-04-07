@@ -21,7 +21,7 @@ const BOT_TOKEN    = process.env.TELEGRAM_BOT_TOKEN;
 const ALLOWED_USERS = (process.env.ALLOWED_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
 const WORK_DIR     = process.env.WORK_DIR     || process.cwd();
 const MODEL        = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6';
-const TIMEOUT_MS   = parseInt(process.env.TIMEOUT_MS || '120000', 10);
+const TIMEOUT_MS   = parseInt(process.env.TIMEOUT_MS || '600000', 10); // 10 min default
 const ALLOWED_TOOLS = process.env.ALLOWED_TOOLS || 'Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch';
 
 if (!BOT_TOKEN) {
@@ -89,12 +89,27 @@ function runClaude(prompt) {
       '--dangerously-skip-permissions',
     ];
 
-    const proc = spawn('claude', args, {
+    // If running as root, drop privileges to CLAUDE_UID/CLAUDE_GID
+    const uid = process.env.CLAUDE_UID ? parseInt(process.env.CLAUDE_UID) : null;
+    const gid = process.env.CLAUDE_GID ? parseInt(process.env.CLAUDE_GID) : null;
+    const claudeHome = process.env.CLAUDE_HOME || process.env.HOME;
+
+    const spawnEnv = {
+      ...process.env,
+      HOME: claudeHome,
+      PATH: `${claudeHome}/.local/bin:/usr/local/bin:/usr/bin:/bin`,
+    };
+
+    const spawnOpts = {
       cwd: WORK_DIR,
-      env: { ...process.env },
+      env: spawnEnv,
       timeout: TIMEOUT_MS,
       stdio: ['ignore', 'pipe', 'pipe'],
-    });
+      ...(uid ? { uid, gid } : {}),
+    };
+
+    const claudeBin = process.env.CLAUDE_BIN || 'claude';
+    const proc = spawn(claudeBin, args, spawnOpts);
 
     let output = '';
     let err = '';
@@ -132,6 +147,12 @@ async function handleMessage(msg) {
 
   processing.add(chatId);
   console.log(`[claude-telegram] Message from ${userId}: ${text.slice(0, 80)}`);
+
+  // Detect portal workflow trigger — give feedback immediately
+  const isPortalTrigger = /^(voer uit|doe maar|go ahead|run it|fais-le|ejecuta|ausführen)/i.test(text.trim());
+  if (isPortalTrigger) {
+    await sendMessage(chatId, 'Bezig met portal opdrachten... Dit kan 5-15 minuten duren.');
+  }
 
   const typingInterval = setInterval(() => sendTyping(chatId), 4000);
   await sendTyping(chatId);
